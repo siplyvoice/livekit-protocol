@@ -2,10 +2,10 @@
   "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
   "changelog": [
     "@livekit/changesets-changelog-github",
-    { "repo": "livekit/protocol" }
+    { "repo": "siplyvoice/livekit-protocol" }
   ],
   "commit": false,
-  "fixed": [["github.com/livekit/protocol", "@livekit/protocol"]],
+  "fixed": [["github.com/siplyvoice/livekit-protocol", "@siplyvoice/livekit-protocol"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
