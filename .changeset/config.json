@@ -5,7 +5,7 @@
     { "repo": "siplyvoice/livekit-protocol" }
   ],
   "commit": false,
-  "fixed": [["github.com/siplyvoice/livekit-protocol", "@siplyvoice/livekit-protocol"]],
+  "fixed": [["@siplyvoice/livekit-protocol"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
