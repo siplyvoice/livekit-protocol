@@ -4,12 +4,18 @@ on:
     branches:
       - main
 concurrency: ${{ github.workflow }}-${{ github.ref }}
+permissions:
+  contents: write
+  packages: write
+  pull-requests: write
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install Protoc
         uses: arduino/setup-protoc@v2
         with:
