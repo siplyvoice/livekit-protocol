@@ -16,7 +16,7 @@ import proto "google.golang.org/protobuf/proto"
 import twirp "github.com/twitchtv/twirp"
 import ctxsetters "github.com/twitchtv/twirp/ctxsetters"
 
-import google_protobuf2 "google.golang.org/protobuf/types/known/emptypb"
+import google_protobuf2 "github.com/golang/protobuf/ptypes/empty"
 
 // Version compatibility assertion.
 // If the constant is not defined in the package, that likely means

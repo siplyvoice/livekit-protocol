@@ -74,6 +74,44 @@ func TestWebHook(t *testing.T) {
 		wg.Wait()
 	})
 
+	t.Run("test data channel message event", func(t *testing.T) {
+		notifier := newTestNotifier()
+		defer notifier.Stop(false)
+
+		payload := []byte("test message")
+		event := &livekit.WebhookEvent{
+			Event: EventDataChannelMessage,
+			Room: &livekit.Room{
+				Name: "test-room",
+			},
+			Participant: &livekit.ParticipantInfo{
+				Identity: "test-user",
+			},
+			DataMessage: &livekit.DataMessage{
+				MessageId: "MSG_12345",
+				Payload:   payload,
+				Topic:     "test-topic",
+			},
+		}
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+		s.handler = func(w http.ResponseWriter, r *http.Request) {
+			defer wg.Done()
+			decodedEvent, err := ReceiveWebhookEvent(r, authProvider)
+			require.NoError(t, err)
+
+			require.EqualValues(t, event, decodedEvent)
+			require.Equal(t, EventDataChannelMessage, decodedEvent.Event)
+			require.NotNil(t, decodedEvent.DataMessage)
+			require.Equal(t, "MSG_12345", decodedEvent.DataMessage.MessageId)
+			require.Equal(t, payload, decodedEvent.DataMessage.Payload)
+			require.Equal(t, "test-topic", decodedEvent.DataMessage.Topic)
+		}
+		require.NoError(t, notifier.QueueNotify(context.Background(), event))
+		wg.Wait()
+	})
+
 }
 
 func TestURLNotifierDropped(t *testing.T) {
@@ -327,6 +365,50 @@ func TestURLNotifierFilter(t *testing.T) {
 			webhookCheckInterval,
 		)
 	})
+
+	t.Run("data channel message filter", func(t *testing.T) {
+		urlNotifier := NewURLNotifier(URLNotifierParams{
+			URL:       testUrl,
+			APIKey:    testAPIKey,
+			APISecret: testAPISecret,
+			FilterParams: FilterParams{
+				IncludeEvents: []string{EventDataChannelMessage},
+			},
+			Config: URLNotifierConfig{
+				QueueSize: 20,
+			},
+		})
+		defer urlNotifier.Stop(false)
+
+		numCalled := atomic.Int32{}
+		s.handler = func(w http.ResponseWriter, r *http.Request) {
+			decodedEvent, err := ReceiveWebhookEvent(r, authProvider)
+			require.NoError(t, err)
+			require.Equal(t, EventDataChannelMessage, decodedEvent.Event)
+			numCalled.Inc()
+		}
+
+		// Only EventDataChannelMessage should be allowed
+		_ = urlNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{Event: EventRoomStarted})
+		_ = urlNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{
+			Event: EventDataChannelMessage,
+			DataMessage: &livekit.DataMessage{
+				MessageId: "MSG_filter_test",
+				Payload:   []byte("filter test"),
+				Topic:     "filter-topic",
+			},
+		})
+		_ = urlNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{Event: EventRoomFinished})
+		
+		require.Eventually(
+			t,
+			func() bool {
+				return numCalled.Load() == 1
+			},
+			5*time.Second,
+			webhookCheckInterval,
+		)
+	})
 }
 
 func newTestNotifier() *URLNotifier {
@@ -375,6 +457,50 @@ func TestResourceWebHook(t *testing.T) {
 			require.NoError(t, err)
 
 			require.EqualValues(t, event, decodedEvent)
+		}
+		require.NoError(t, resourceURLNotifier.QueueNotify(context.Background(), event))
+		wg.Wait()
+	})
+
+	t.Run("test data channel message event", func(t *testing.T) {
+		resourceURLNotifier := NewDefaultNotifier(
+			WebHookConfig{
+				URLs:   []string{testUrl},
+				APIKey: testAPIKey,
+			},
+			testAPISecret,
+		)
+		defer resourceURLNotifier.Stop(false)
+
+		payload := []byte("test resource message")
+		event := &livekit.WebhookEvent{
+			Event: EventDataChannelMessage,
+			Room: &livekit.Room{
+				Name: "test-resource-room",
+			},
+			Participant: &livekit.ParticipantInfo{
+				Identity: "test-resource-user",
+			},
+			DataMessage: &livekit.DataMessage{
+				MessageId: "MSG_resource_12345",
+				Payload:   payload,
+				Topic:     "test-resource-topic",
+			},
+		}
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+		s.handler = func(w http.ResponseWriter, r *http.Request) {
+			defer wg.Done()
+			decodedEvent, err := ReceiveWebhookEvent(r, authProvider)
+			require.NoError(t, err)
+
+			require.EqualValues(t, event, decodedEvent)
+			require.Equal(t, EventDataChannelMessage, decodedEvent.Event)
+			require.NotNil(t, decodedEvent.DataMessage)
+			require.Equal(t, "MSG_resource_12345", decodedEvent.DataMessage.MessageId)
+			require.Equal(t, payload, decodedEvent.DataMessage.Payload)
+			require.Equal(t, "test-resource-topic", decodedEvent.DataMessage.Topic)
 		}
 		require.NoError(t, resourceURLNotifier.QueueNotify(context.Background(), event))
 		wg.Wait()
@@ -798,6 +924,54 @@ func TestResourceURLNotifierFilter(t *testing.T) {
 		// EventRoomStarted should be allowed as IncludeEvents take precedence
 		_ = resourceURLNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{Event: EventRoomStarted})
 		_ = resourceURLNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{Event: EventRoomFinished})
+		require.Eventually(
+			t,
+			func() bool {
+				return numCalled.Load() == 1
+			},
+			5*time.Second,
+			webhookCheckInterval,
+		)
+	})
+
+	t.Run("data channel message filter", func(t *testing.T) {
+		resourceURLNotifier := NewResourceURLNotifier(ResourceURLNotifierParams{
+			URL:       testUrl,
+			APIKey:    testAPIKey,
+			APISecret: testAPISecret,
+			Config: ResourceURLNotifierConfig{
+				MaxAge:   200 * time.Millisecond,
+				MaxDepth: 50,
+			},
+			FilterParams: FilterParams{
+				IncludeEvents: []string{EventDataChannelMessage},
+			},
+		})
+		defer resourceURLNotifier.Stop(false)
+
+		numCalled := atomic.Int32{}
+		s.handler = func(w http.ResponseWriter, r *http.Request) {
+			decodedEvent, err := ReceiveWebhookEvent(r, authProvider)
+			require.NoError(t, err)
+			require.Equal(t, EventDataChannelMessage, decodedEvent.Event)
+			numCalled.Inc()
+		}
+
+		// Only EventDataChannelMessage should be allowed
+		_ = resourceURLNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{Event: EventRoomStarted})
+		_ = resourceURLNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{
+			Event: EventDataChannelMessage,
+			Room: &livekit.Room{
+				Name: "test-resource-filter-room",
+			},
+			DataMessage: &livekit.DataMessage{
+				MessageId: "MSG_resource_filter_test",
+				Payload:   []byte("resource filter test"),
+				Topic:     "resource-filter-topic",
+			},
+		})
+		_ = resourceURLNotifier.QueueNotify(context.Background(), &livekit.WebhookEvent{Event: EventRoomFinished})
+		
 		require.Eventually(
 			t,
 			func() bool {

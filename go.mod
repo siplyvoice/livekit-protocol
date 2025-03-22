@@ -11,6 +11,7 @@ require (
 	github.com/gammazero/deque v1.0.0
 	github.com/go-jose/go-jose/v3 v3.0.4
 	github.com/go-logr/logr v1.4.2
+	github.com/golang/protobuf v1.5.4
 	github.com/hashicorp/go-retryablehttp v0.7.7
 	github.com/jxskiss/base62 v1.1.0
 	github.com/lithammer/shortuuid/v4 v4.2.0
