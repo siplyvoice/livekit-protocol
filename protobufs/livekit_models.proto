@@ -78,10 +78,13 @@ enum ImageCodec {
 
 // Policy for publisher to handle subscribers that are unable to support the primary codec of a track
 enum BackupCodecPolicy {
-  // default behavior, regress to backup codec and all subscribers will receive the backup codec
-  REGRESSION = 0;
+  // default behavior, the track prefer to regress to backup codec and all subscribers will receive the backup codec,
+  // the sfu will try to regress codec if possible but not assured.
+  PREFER_REGRESSION = 0;
   // encoding/send the primary and backup codec simultaneously
   SIMULCAST = 1;
+  // force the track to regress to backup codec, this option can be used in video conference or the publisher has limited bandwidth/encoding power
+  REGRESSION = 2;
 }
 
 message PlayoutDelay {
@@ -137,10 +140,12 @@ message ParticipantInfo {
     SIP = 3;
     // LiveKit agents
     AGENT = 4;
-    // forwarded participant from another room
-    FORWARDED = 5;
-    // Cloud agents
-    CLOUD_AGENT = 6;
+
+    // NEXT_ID: 7
+  }
+  enum KindDetail {
+    CLOUD_AGENT = 0;
+    FORWARDED = 1;
   }
   string sid = 1;
   string identity = 2;
@@ -161,8 +166,9 @@ message ParticipantInfo {
   Kind kind = 14;
   map<string, string> attributes = 15;
   DisconnectReason disconnect_reason = 16;
+  repeated KindDetail kind_details = 18;
 
-  // NEXT_ID: 18
+  // NEXT_ID: 19
 }
 
 enum TrackType {
@@ -409,6 +415,7 @@ message ClientInfo {
      CPP = 10;
      UNITY_WEB = 11;
      NODE = 12;
+     UNREAL = 13;
   }
 
   SDK sdk = 1;
@@ -482,6 +489,8 @@ enum DisconnectReason {
   USER_REJECTED = 12;
   // SIP protocol failure or unexpected response
   SIP_TRUNK_FAILURE = 13;
+  // server timed out a participant session
+  CONNECTION_TIMEOUT = 14;
 }
 
 message RTPDrift {
@@ -632,6 +641,7 @@ enum AudioTrackFeature {
   TF_ECHO_CANCELLATION = 3;
   TF_NOISE_SUPPRESSION = 4;
   TF_ENHANCED_NOISE_CANCELLATION = 5;
+  TF_PRECONNECT_BUFFER = 6; // client will buffer audio once available and send it to the server via bytes stream once connected
 }
 
 message DataStream {
@@ -691,3 +701,7 @@ message DataStream {
   }
 }
 
+message WebhookConfig {
+  string url = 1;
+  string signing_key = 2;
+}

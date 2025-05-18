@@ -308,6 +308,7 @@ message SIPInboundTrunkUpdate {
   optional string auth_password = 5;
   optional string name = 6;
   optional string metadata = 7;
+  optional SIPMediaEncryption media_encryption = 8;
 }
 
 message CreateSIPOutboundTrunkRequest {
@@ -375,6 +376,7 @@ message SIPOutboundTrunkUpdate {
   optional string auth_password = 5;
   optional string name = 6;
   optional string metadata = 7;
+  optional SIPMediaEncryption media_encryption = 8;
 }
 
 message GetSIPInboundTrunkRequest {
@@ -553,6 +555,7 @@ message SIPDispatchRuleUpdate {
   optional string name = 3;
   optional string metadata = 4;
   map<string, string> attributes = 5;
+  optional SIPMediaEncryption media_encryption = 6;
 }
 
 // ListSIPDispatchRuleRequest lists dispatch rules for given filters. If no filters are set, all rules are listed.
@@ -674,6 +677,9 @@ message TransferSIPParticipantRequest {
 
   // Add the following headers to the REFER SIP request.
   map<string, string> headers = 5;
+
+  // Max time for the transfer destination to answer the call.
+  google.protobuf.Duration ringing_timeout = 6;
 }
 
 message SIPCallInfo {
@@ -705,6 +711,19 @@ message SIPCallInfo {
   // NEXT ID: 25
 }
 
+message SIPTransferInfo {
+  string transfer_id = 1;
+  string call_id = 2;
+  string transfer_to = 3;
+  int64 transfer_initiated_at_ns = 4;
+  int64 transfer_completed_at_ns = 5;
+  SIPTransferStatus transfer_status = 6;
+  string error = 7;
+  SIPStatus transfer_status_code = 8;
+
+  // NEXT ID: 7
+}
+
 message SIPUri {
   string user = 1;
   string host = 2;
@@ -719,6 +738,12 @@ enum SIPCallStatus {
   SCS_ACTIVE = 2; // Call is ongoing. SIP participant is active in the LiveKit room
   SCS_DISCONNECTED = 3; // Call has ended
   SCS_ERROR = 4; // Call has ended or never succeeded because of an error
+}
+
+enum SIPTransferStatus {
+  STS_TRANSFER_ONGOING = 0;
+  STS_TRANSFER_FAILED = 1;
+  STS_TRANSFER_SUCCESSFUL = 2;
 }
 
 enum SIPFeature {

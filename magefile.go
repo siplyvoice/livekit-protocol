@@ -108,7 +108,6 @@ func Proto() error {
 		"--twirp_opt=paths=source_relative",
 		"--plugin=go=" + protocGoPath,
 		"--plugin=twirp=" + twirpPath,
-		"--experimental_allow_proto3_optional",
 		"-I=./protobufs",
 	}, twirpProtoFiles...)
 	cmd := exec.Command(protoc, args...)
@@ -126,7 +125,6 @@ func Proto() error {
 		"--twirp_opt=paths=source_relative",
 		"--plugin=go=" + protocGoPath,
 		"--plugin=twirp=" + twirpPath,
-		"--experimental_allow_proto3_optional",
 		"-I=./protobufs",
 	}, "cloud_replay.proto")
 	cmd = exec.Command(protoc, args...)
@@ -140,7 +138,6 @@ func Proto() error {
 		"--go_out", target,
 		"--go_opt=paths=source_relative",
 		"--plugin=go=" + protocGoPath,
-		"--experimental_allow_proto3_optional",
 		"-I=./protobufs",
 	}, protoFiles...)
 	cmd = exec.Command(protoc, args...)
@@ -156,7 +153,6 @@ func Proto() error {
 		"--go-grpc_opt=paths=source_relative",
 		"--plugin=go=" + protocGoPath,
 		"--plugin=go-grpc=" + protocGrpcGoPath,
-		"--experimental_allow_proto3_optional",
 		"-I=./protobufs",
 	}, grpcProtoFiles...)
 	cmd = exec.Command(protoc, args...)
@@ -186,7 +182,6 @@ func Proto() error {
 		"--psrpc_opt=paths=source_relative",
 		"--plugin=go=" + protocGoPath,
 		"--plugin=psrpc=" + psrpcPath,
-		"--experimental_allow_proto3_optional",
 		"-I" + psrpcDir + "/protoc-gen-psrpc/options",
 		"-I=./protobufs",
 	}, psrpcProtoFiles...)

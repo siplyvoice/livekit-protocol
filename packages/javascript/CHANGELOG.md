@@ -1,5 +1,75 @@
 # @livekit/protocol
 
+## 1.38.0
+
+### Minor Changes
+
+- feat: MoveParticipant API - [#1065](https://github.com/livekit/protocol/pull/1065) ([@cnderrauber](https://github.com/cnderrauber))
+
+### Patch Changes
+
+- fix memory path for cgroups v2 - [#1060](https://github.com/livekit/protocol/pull/1060) ([@boks1971](https://github.com/boks1971))
+
+- Fix paths and simplify. - [#1062](https://github.com/livekit/protocol/pull/1062) ([@boks1971](https://github.com/boks1971))
+
+## 1.37.1
+
+### Patch Changes
+
+- allow rewriting deferred logger values - [#1053](https://github.com/livekit/protocol/pull/1053) ([@paulwe](https://github.com/paulwe))
+
+- Deprecate explicit AddTrackRequest fields that can be read from AudioTrackFeatures - [#1058](https://github.com/livekit/protocol/pull/1058) ([@lukasIO](https://github.com/lukasIO))
+
+- Add PreconnectBuffer to AudioTrackFeatures, add AudioTrackFeatures to AddTrackRequest - [#1057](https://github.com/livekit/protocol/pull/1057) ([@lukasIO](https://github.com/lukasIO))
+
+## 1.37.0
+
+### Minor Changes
+
+- Allow specifying extra webhooks in egress start requests - [#1040](https://github.com/livekit/protocol/pull/1040) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Allow updating SIP media encryption. - [#1047](https://github.com/livekit/protocol/pull/1047) ([@dennwc](https://github.com/dennwc))
+
+- Add timeout parameter to SIP transfer API. - [#1036](https://github.com/livekit/protocol/pull/1036) ([@dennwc](https://github.com/dennwc))
+
+### Patch Changes
+
+- allow calling promise.Resolve more than once - [#1035](https://github.com/livekit/protocol/pull/1035) ([@paulwe](https://github.com/paulwe))
+
+- Add CONNECTION_TIMEOUT disconnect reason - [#1037](https://github.com/livekit/protocol/pull/1037) ([@boks1971](https://github.com/boks1971))
+
+- Add IMAGE_SUFFIX_NONE_OVERWRITE - [#1052](https://github.com/livekit/protocol/pull/1052) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Add rate for memory use and total. - [#1030](https://github.com/livekit/protocol/pull/1030) ([@boks1971](https://github.com/boks1971))
+
+- Add IngressID and ResourceID attributes for the ingress participants - [#1042](https://github.com/livekit/protocol/pull/1042) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Revert cid changes. - [#1029](https://github.com/livekit/protocol/pull/1029) ([@boks1971](https://github.com/boks1971))
+
+- Export GetEgressNotifyOptions - [#1045](https://github.com/livekit/protocol/pull/1045) ([@biglittlebigben](https://github.com/biglittlebigben))
+
+- Add more fields to CodecInfo. - [#1024](https://github.com/livekit/protocol/pull/1024) ([@boks1971](https://github.com/boks1971))
+
+- Add client info enum value for unreal - [#1032](https://github.com/livekit/protocol/pull/1032) ([@bcherry](https://github.com/bcherry))
+
+## 1.36.1
+
+### Patch Changes
+
+- Refine backup codec policy - [#1022](https://github.com/livekit/protocol/pull/1022) ([@cnderrauber](https://github.com/cnderrauber))
+
+## 1.36.0
+
+### Minor Changes
+
+- add cloud agents - [#1010](https://github.com/livekit/protocol/pull/1010) ([@real-danm](https://github.com/real-danm))
+
+- Update API for SIP. - [#869](https://github.com/livekit/protocol/pull/869) ([@dennwc](https://github.com/dennwc))
+
+### Patch Changes
+
+- Add KindDetails enum on ParticipantInfo - [#1019](https://github.com/livekit/protocol/pull/1019) ([@lukasIO](https://github.com/lukasIO))
+
 ## 1.35.0
 
 ### Minor Changes

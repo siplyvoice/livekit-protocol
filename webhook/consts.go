@@ -36,5 +36,5 @@ const (
 	EventEgressEnded       = "egress_ended"
 	EventIngressStarted    = "ingress_started"
 	EventIngressEnded      = "ingress_ended"
-	EventDataChannelMessage = "data_channel_message"
+        EventDataChannelMessage = "data_channel_message"
 )

@@ -12,33 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package egress
+package hwstats
 
 import (
-	"time"
-
-	"github.com/livekit/protocol/auth"
-	"github.com/livekit/protocol/livekit"
+	"github.com/mackerelio/go-osstat/memory"
 )
 
-func BuildEgressToken(egressID, apiKey, secret, roomName string) (string, error) {
-	f := false
-	t := true
-	grant := &auth.VideoGrant{
-		RoomJoin:       true,
-		Room:           roomName,
-		CanSubscribe:   &t,
-		CanPublish:     &f,
-		CanPublishData: &f,
-		Hidden:         true,
-		Recorder:       true,
+type osStatMemoryGetter struct{}
+
+func newOSStatMemoryGetter() (*osStatMemoryGetter, error) {
+	return &osStatMemoryGetter{}, nil
+}
+
+func (o *osStatMemoryGetter) getMemory() (uint64, uint64, error) {
+	stats, err := memory.Get()
+	if err != nil {
+		return 0, 0, err
 	}
-
-	at := auth.NewAccessToken(apiKey, secret).
-		SetVideoGrant(grant).
-		SetIdentity(egressID).
-		SetKind(livekit.ParticipantInfo_EGRESS).
-		SetValidFor(24 * time.Hour)
-
-	return at.ToJWT()
+	return stats.Used, stats.Total, nil
 }

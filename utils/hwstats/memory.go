@@ -12,33 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package egress
+package hwstats
 
-import (
-	"time"
+// This object returns cgroup quota aware memory stats. On other systems than Linux,
+// it falls back to full system stats
 
-	"github.com/livekit/protocol/auth"
-	"github.com/livekit/protocol/livekit"
-)
+type platformMemoryGetter interface {
+	getMemory() (uint64, uint64, error)
+}
 
-func BuildEgressToken(egressID, apiKey, secret, roomName string) (string, error) {
-	f := false
-	t := true
-	grant := &auth.VideoGrant{
-		RoomJoin:       true,
-		Room:           roomName,
-		CanSubscribe:   &t,
-		CanPublish:     &f,
-		CanPublishData: &f,
-		Hidden:         true,
-		Recorder:       true,
+type MemoryStats struct {
+	platform platformMemoryGetter
+}
+
+func NewMemoryStats() (*MemoryStats, error) {
+	p, err := newPlatformMemoryGetter()
+	if err != nil {
+		return nil, err
 	}
 
-	at := auth.NewAccessToken(apiKey, secret).
-		SetVideoGrant(grant).
-		SetIdentity(egressID).
-		SetKind(livekit.ParticipantInfo_EGRESS).
-		SetValidFor(24 * time.Hour)
+	return &MemoryStats{
+		platform: p,
+	}, nil
+}
 
-	return at.ToJWT()
+func (m *MemoryStats) GetMemory() (uint64, uint64, error) {
+	return m.platform.getMemory()
 }

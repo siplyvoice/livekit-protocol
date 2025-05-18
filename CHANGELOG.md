@@ -1,5 +1,71 @@
 # github.com/livekit/protocol
 
+## 1.38.0
+
+### Minor Changes
+
+- feat: MoveParticipant API - [#1065](https://github.com/livekit/protocol/pull/1065) ([@cnderrauber](https://github.com/cnderrauber))
+
+## 1.37.1
+
+### Patch Changes
+
+- Deprecate explicit AddTrackRequest fields that can be read from AudioTrackFeatures - [#1058](https://github.com/livekit/protocol/pull/1058) ([@lukasIO](https://github.com/lukasIO))
+
+- Add PreconnectBuffer to AudioTrackFeatures, add AudioTrackFeatures to AddTrackRequest - [#1057](https://github.com/livekit/protocol/pull/1057) ([@lukasIO](https://github.com/lukasIO))
+
+## 1.37.0
+
+### Minor Changes
+
+- Allow updating SIP media encryption. - [#1047](https://github.com/livekit/protocol/pull/1047) ([@dennwc](https://github.com/dennwc))
+
+- Add helper to get SIP call status from an error. - [#1028](https://github.com/livekit/protocol/pull/1028) ([@dennwc](https://github.com/dennwc))
+
+- Add timeout parameter to SIP transfer API. - [#1036](https://github.com/livekit/protocol/pull/1036) ([@dennwc](https://github.com/dennwc))
+
+- Fix SIP update when replacing array fields. - [#1038](https://github.com/livekit/protocol/pull/1038) ([@dennwc](https://github.com/dennwc))
+
+### Patch Changes
+
+- Add CONNECTION_TIMEOUT disconnect reason - [#1037](https://github.com/livekit/protocol/pull/1037) ([@boks1971](https://github.com/boks1971))
+
+- Add rate for memory use and total. - [#1030](https://github.com/livekit/protocol/pull/1030) ([@boks1971](https://github.com/boks1971))
+
+- Revert cid changes. - [#1029](https://github.com/livekit/protocol/pull/1029) ([@boks1971](https://github.com/boks1971))
+
+- Use cgroup for memory stats. - [#1031](https://github.com/livekit/protocol/pull/1031) ([@boks1971](https://github.com/boks1971))
+
+- Allow '\_' in SIP headers. - [#1048](https://github.com/livekit/protocol/pull/1048) ([@dennwc](https://github.com/dennwc))
+
+- Add more fields to CodecInfo. - [#1024](https://github.com/livekit/protocol/pull/1024) ([@boks1971](https://github.com/boks1971))
+
+- Add client info enum value for unreal - [#1032](https://github.com/livekit/protocol/pull/1032) ([@bcherry](https://github.com/bcherry))
+
+- Rework node stats to split out rate metrics into its own shape. - [#1023](https://github.com/livekit/protocol/pull/1023) ([@boks1971](https://github.com/boks1971))
+
+## 1.36.1
+
+### Patch Changes
+
+- Remove unused kinds - [#1020](https://github.com/livekit/protocol/pull/1020) ([@cnderrauber](https://github.com/cnderrauber))
+
+- Refine backup codec policy - [#1022](https://github.com/livekit/protocol/pull/1022) ([@cnderrauber](https://github.com/cnderrauber))
+
+## 1.36.0
+
+### Minor Changes
+
+- add cloud agents - [#1010](https://github.com/livekit/protocol/pull/1010) ([@real-danm](https://github.com/real-danm))
+
+- sdp.go: add helper functions for simulcast and trackId - [#1018](https://github.com/livekit/protocol/pull/1018) ([@anunaym14](https://github.com/anunaym14))
+
+- Update API for SIP. - [#869](https://github.com/livekit/protocol/pull/869) ([@dennwc](https://github.com/dennwc))
+
+### Patch Changes
+
+- Fix incremental SIP dispatch rule update. - [#1014](https://github.com/livekit/protocol/pull/1014) ([@dennwc](https://github.com/dennwc))
+
 ## 1.35.0
 
 ### Minor Changes

@@ -10,7 +10,6 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/livekit/protocol/utils/xtwirp"
 )
@@ -19,6 +18,20 @@ var (
 	_ xtwirp.ErrorMeta = (*SIPStatus)(nil)
 	_ error            = (*SIPStatus)(nil)
 )
+
+// SIPStatusFrom unwraps an error and returns associated SIP call status, if any.
+func SIPStatusFrom(err error) *SIPStatus {
+	st, ok := status.FromError(err)
+	if !ok {
+		return nil
+	}
+	for _, d := range st.Details() {
+		if e, ok := d.(*SIPStatus); ok {
+			return e
+		}
+	}
+	return nil
+}
 
 func (p SIPStatusCode) ShortName() string {
 	return strings.TrimPrefix(p.String(), "SIP_STATUS_")
@@ -205,7 +218,7 @@ func (p *SIPOutboundTrunkInfo) AsTrunkInfo() *SIPTrunkInfo {
 	}
 }
 
-var reHeaders = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-]*$`)
+var reHeaders = regexp.MustCompile(`^[a-zA-Z][a-zA-Z0-9\-_]*$`)
 
 func validateHeader(header string) error {
 	if !reHeaders.MatchString(header) {
@@ -364,12 +377,13 @@ func (p *SIPInboundTrunkUpdate) Apply(info *SIPInboundTrunkInfo) error {
 	applyUpdate(&info.AuthPassword, p.AuthPassword)
 	applyUpdate(&info.Name, p.Name)
 	applyUpdate(&info.Metadata, p.Metadata)
+	applyUpdate(&info.MediaEncryption, p.MediaEncryption)
 	return info.Validate()
 }
 
 type UpdateSIPOutboundTrunkRequestAction interface {
 	isUpdateSIPOutboundTrunkRequest_Action
-	Apply(info *SIPOutboundTrunkInfo) error
+	Apply(info *SIPOutboundTrunkInfo) (*SIPOutboundTrunkInfo, error)
 }
 
 var (
@@ -377,24 +391,30 @@ var (
 	_ UpdateSIPOutboundTrunkRequestAction = (*UpdateSIPOutboundTrunkRequest_Update)(nil)
 )
 
-func (p *UpdateSIPOutboundTrunkRequest_Replace) Apply(info *SIPOutboundTrunkInfo) error {
-	val := p.Replace
+func (p *UpdateSIPOutboundTrunkRequest_Replace) Apply(info *SIPOutboundTrunkInfo) (*SIPOutboundTrunkInfo, error) {
+	val := cloneProto(p.Replace)
 	if val == nil {
-		return errors.New("missing trunk")
+		return nil, errors.New("missing trunk")
 	}
 	if info.SipTrunkId != "" {
 		val.SipTrunkId = info.SipTrunkId
 	}
-	proto.Merge(info, val)
-	return val.Validate()
+	if err := val.Validate(); err != nil {
+		return nil, err
+	}
+	return val, nil
 }
 
-func (p *UpdateSIPOutboundTrunkRequest_Update) Apply(info *SIPOutboundTrunkInfo) error {
+func (p *UpdateSIPOutboundTrunkRequest_Update) Apply(info *SIPOutboundTrunkInfo) (*SIPOutboundTrunkInfo, error) {
 	diff := p.Update
 	if diff == nil {
-		return errors.New("missing trunk update")
+		return nil, errors.New("missing trunk update")
 	}
-	return diff.Apply(info)
+	val := cloneProto(info)
+	if err := diff.Apply(val); err != nil {
+		return nil, err
+	}
+	return val, nil
 }
 
 func (p *SIPOutboundTrunkInfo) Validate() error {
@@ -455,12 +475,13 @@ func (p *SIPOutboundTrunkUpdate) Apply(info *SIPOutboundTrunkInfo) error {
 	applyUpdate(&info.AuthPassword, p.AuthPassword)
 	applyUpdate(&info.Name, p.Name)
 	applyUpdate(&info.Metadata, p.Metadata)
+	applyUpdate(&info.MediaEncryption, p.MediaEncryption)
 	return info.Validate()
 }
 
 type UpdateSIPInboundTrunkRequestAction interface {
 	isUpdateSIPInboundTrunkRequest_Action
-	Apply(info *SIPInboundTrunkInfo) error
+	Apply(info *SIPInboundTrunkInfo) (*SIPInboundTrunkInfo, error)
 }
 
 var (
@@ -468,24 +489,30 @@ var (
 	_ UpdateSIPInboundTrunkRequestAction = (*UpdateSIPInboundTrunkRequest_Update)(nil)
 )
 
-func (p *UpdateSIPInboundTrunkRequest_Replace) Apply(info *SIPInboundTrunkInfo) error {
-	val := p.Replace
+func (p *UpdateSIPInboundTrunkRequest_Replace) Apply(info *SIPInboundTrunkInfo) (*SIPInboundTrunkInfo, error) {
+	val := cloneProto(p.Replace)
 	if val == nil {
-		return errors.New("missing trunk")
+		return nil, errors.New("missing trunk")
 	}
 	if info.SipTrunkId != "" {
 		val.SipTrunkId = info.SipTrunkId
 	}
-	proto.Merge(info, val)
-	return val.Validate()
+	if err := val.Validate(); err != nil {
+		return nil, err
+	}
+	return val, nil
 }
 
-func (p *UpdateSIPInboundTrunkRequest_Update) Apply(info *SIPInboundTrunkInfo) error {
+func (p *UpdateSIPInboundTrunkRequest_Update) Apply(info *SIPInboundTrunkInfo) (*SIPInboundTrunkInfo, error) {
 	diff := p.Update
 	if diff == nil {
-		return errors.New("missing trunk update")
+		return nil, errors.New("missing trunk update")
 	}
-	return diff.Apply(info)
+	val := cloneProto(info)
+	if err := diff.Apply(val); err != nil {
+		return nil, err
+	}
+	return val, nil
 }
 
 func (p *CreateSIPDispatchRuleRequest) DispatchRuleInfo() *SIPDispatchRuleInfo {
@@ -569,13 +596,14 @@ func (p *SIPDispatchRuleUpdate) Apply(info *SIPDispatchRuleInfo) error {
 	applyUpdatePtr(&info.Rule, p.Rule)
 	applyUpdate(&info.Name, p.Name)
 	applyUpdate(&info.Metadata, p.Metadata)
+	applyUpdate(&info.MediaEncryption, p.MediaEncryption)
 	applyMapDiff(&info.Attributes, p.Attributes)
 	return info.Validate()
 }
 
 type UpdateSIPDispatchRuleRequestAction interface {
 	isUpdateSIPDispatchRuleRequest_Action
-	Apply(info *SIPDispatchRuleInfo) error
+	Apply(info *SIPDispatchRuleInfo) (*SIPDispatchRuleInfo, error)
 }
 
 var (
@@ -583,24 +611,30 @@ var (
 	_ UpdateSIPDispatchRuleRequestAction = (*UpdateSIPDispatchRuleRequest_Update)(nil)
 )
 
-func (p *UpdateSIPDispatchRuleRequest_Replace) Apply(info *SIPDispatchRuleInfo) error {
-	val := p.Replace
+func (p *UpdateSIPDispatchRuleRequest_Replace) Apply(info *SIPDispatchRuleInfo) (*SIPDispatchRuleInfo, error) {
+	val := cloneProto(p.Replace)
 	if val == nil {
-		return errors.New("missing dispatch rule")
+		return nil, errors.New("missing dispatch rule")
 	}
 	if info.SipDispatchRuleId != "" {
 		val.SipDispatchRuleId = info.SipDispatchRuleId
 	}
-	proto.Merge(info, val)
-	return val.Validate()
+	if err := val.Validate(); err != nil {
+		return nil, err
+	}
+	return val, nil
 }
 
-func (p *UpdateSIPDispatchRuleRequest_Update) Apply(info *SIPDispatchRuleInfo) error {
+func (p *UpdateSIPDispatchRuleRequest_Update) Apply(info *SIPDispatchRuleInfo) (*SIPDispatchRuleInfo, error) {
 	diff := p.Update
 	if diff == nil {
-		return errors.New("missing dispatch rule update")
+		return nil, errors.New("missing dispatch rule update")
 	}
-	return diff.Apply(info)
+	val := cloneProto(info)
+	if err := diff.Apply(val); err != nil {
+		return nil, err
+	}
+	return val, nil
 }
 
 func (p *CreateSIPParticipantRequest) Validate() error {
