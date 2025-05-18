@@ -23,10 +23,19 @@ import "livekit_models.proto";
 import "livekit_egress.proto";
 import "livekit_ingress.proto";
 
+message DataMessage {
+  // unique message ID
+  string message_id = 1;
+  // message payload
+  bytes payload = 2;
+  // optional topic
+  string topic = 3;
+}
+
 message WebhookEvent {
   // one of room_started, room_finished, participant_joined, participant_left,
   // track_published, track_unpublished, egress_started, egress_updated, egress_ended,
-  // ingress_started, ingress_ended
+  // ingress_started, ingress_ended, data_channel_message
   string event = 1;
 
   Room room = 2;
@@ -51,5 +60,7 @@ message WebhookEvent {
 
   int32 num_dropped = 11 [deprecated=true];
 
-  // NEXT_ID: 12
+  DataMessage data_message = 12;
+
+  // NEXT_ID: 13
 }

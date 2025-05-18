@@ -82,6 +82,44 @@ func TestWebHook(t *testing.T) {
 
 	})
 
+	t.Run("test data channel message event", func(t *testing.T) {
+		notifier := newTestNotifier()
+		defer notifier.Stop(false)
+
+		payload := []byte("test message")
+		event := &livekit.WebhookEvent{
+			Event: EventDataChannelMessage,
+			Room: &livekit.Room{
+				Name: "test-room",
+			},
+			Participant: &livekit.ParticipantInfo{
+				Identity: "test-user",
+			},
+			DataMessage: &livekit.DataMessage{
+				MessageId: "MSG_12345",
+				Payload:   payload,
+				Topic:     "test-topic",
+			},
+		}
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+		s.handler = func(w http.ResponseWriter, r *http.Request) {
+			defer wg.Done()
+			decodedEvent, err := ReceiveWebhookEvent(r, authProvider)
+			require.NoError(t, err)
+
+			require.EqualValues(t, event, decodedEvent)
+			require.Equal(t, EventDataChannelMessage, decodedEvent.Event)
+			require.NotNil(t, decodedEvent.DataMessage)
+			require.Equal(t, "MSG_12345", decodedEvent.DataMessage.MessageId)
+			require.Equal(t, payload, decodedEvent.DataMessage.Payload)
+			require.Equal(t, "test-topic", decodedEvent.DataMessage.Topic)
+		}
+		require.NoError(t, notifier.QueueNotify(context.Background(), event))
+		wg.Wait()
+	})
+
 }
 
 func TestURLNotifierDropped(t *testing.T) {
